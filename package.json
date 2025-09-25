@@ -1,0 +1,24 @@
+{
+  "name": "ocean-hazard-platform",
+  "version": "1.0.0",
+  "description": "Integrated Platform for Crowdsourced Ocean Hazard Reporting",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:nlp\"",
+    "dev:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:nlp": "cd ai-nlp-service && python app.py",
+    "build": "cd frontend && npm run build",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend && npm test",
+    "test:backend": "cd backend && npm test"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "mobile-app",
+    "ai-nlp-service"
+  ],
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
