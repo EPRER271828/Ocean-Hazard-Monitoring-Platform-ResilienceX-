@@ -1,0 +1,351 @@
+<!-- Save as auth.html (replace existing) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OceanSafe • Sign In / Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --blue: #2563eb;
+      --indigo: #1f3aae;
+      --muted: #64748b;
+      --bg: #f3f6fb;
+      --card-shadow: 0 18px 40px rgba(16,24,40,0.08);
+      --glass: rgba(255,255,255,0.7);
+      --radius: 14px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#eaf2ff 0%, #f3f6fb 50%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      color:#0f172a;
+    }
+
+    /* Card */
+    .card{
+      width:980px;
+      max-width:100%;
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:linear-gradient(180deg,#ffffff, #fbfdff);
+      box-shadow:var(--card-shadow);
+      display:flex;
+      gap:0;
+      align-items:stretch;
+    }
+
+    /* Left hero */
+    .left{
+      flex:1;
+      padding:48px 36px;
+      background: linear-gradient(180deg,#07203b 0%, #133e7a 100%);
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:18px;
+      min-width:320px;
+    }
+    .left .logo{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      font-weight:700;
+      font-size:20px;
+    }
+    .left h1{margin:0;font-size:26px;letter-spacing:0.2px}
+    .left p{margin:0;opacity:0.92;line-height:1.45;color:rgba(255,255,255,0.9)}
+    .left .features{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .chip{background:rgba(255,255,255,0.08);padding:8px 10px;border-radius:999px;font-size:13px}
+
+    /* Right area (forms) */
+    .right{
+      width:460px;
+      max-width:100%;
+      padding:34px 36px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.85));
+      backdrop-filter: blur(6px);
+    }
+
+    .top-row{display:flex;justify-content:space-between;align-items:center}
+    .top-row .title{font-weight:800;font-size:18px}
+    .back-link{color:var(--muted);text-decoration:none;font-size:14px}
+
+    .tabs{display:flex;gap:8px;margin-top:8px}
+    .tab-btn{
+      flex:1;
+      padding:10px;
+      border-radius:10px;
+      border:1px solid rgba(16,24,40,0.04);
+      background:transparent;
+      cursor:pointer;
+      font-weight:700;
+      color:var(--muted);
+      transition:all .18s ease;
+    }
+    .tab-btn.active{
+      background:linear-gradient(90deg,var(--blue),var(--indigo));
+      color:#fff;
+      box-shadow:0 8px 20px rgba(37,99,235,0.12);
+      border:none;
+    }
+
+    .form{display:grid;gap:12px;margin-top:8px}
+    .field{position:relative;display:flex;align-items:center}
+    input[type="text"],input[type="email"],input[type="password"]{
+      width:100%;
+      padding:12px 14px 12px 40px;
+      border-radius:10px;
+      border:1px solid rgba(16,24,40,0.06);
+      font-size:14px;
+      outline:none;
+      transition:box-shadow .15s, border-color .12s;
+      background: #fff;
+    }
+    input:focus{box-shadow:0 6px 18px rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.45)}
+
+    /* icon inside input */
+    .field .icon{
+      position:absolute;left:12px;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;opacity:0.7;
+    }
+
+    .small-muted{font-size:13px;color:var(--muted);text-align:center;margin-top:6px}
+    .link{color:var(--blue);cursor:pointer;font-weight:600}
+
+    .primary{
+      background:linear-gradient(90deg,var(--blue),var(--indigo));
+      color:#fff;padding:12px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:15px;
+      box-shadow:0 10px 30px rgba(37,99,235,0.12);
+    }
+
+    .secondary{background:transparent;border:1px solid rgba(16,24,40,0.06);padding:10px;border-radius:10px;cursor:pointer}
+
+    .or-row{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;margin-top:8px}
+    .or-row:before,.or-row:after{content:"";flex:1;height:1px;background:rgba(16,24,40,0.04);display:block}
+
+    .footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:6px}
+
+    /* password toggle */
+    .toggle-pass{position:absolute;right:10px;cursor:pointer;padding:6px;border-radius:6px;color:var(--muted)}
+    .checkbox-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-top:6px}
+
+    /* responsive */
+    @media(max-width:900px){
+      .card{flex-direction:column;width:92%}
+      .left{display:none}
+      .right{width:100%;padding:20px}
+    }
+
+    /* tiny accessibility focus */
+    button:focus,input:focus{outline-offset:2px}
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="auth-title">
+    <div class="left" aria-hidden="true">
+      <div class="logo">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="6" fill="rgba(255,255,255,0.08)"/>
+          <path d="M7 14s2-3 5-3 5 3 5 3" stroke="#9FE6FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 10s2-3 5-3 5 3 5 3" stroke="#BDE5FF" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>
+          OceanSafe
+          <div style="font-size:12px;opacity:0.9;font-weight:600">SIH 2025 • INCOIS</div>
+        </div>
+      </div>
+
+      <h1 id="auth-title">Protecting our Coastlines</h1>
+      <p>Sign up or log in to submit geotagged reports, view live maps and receive alerts. Built for the Smart India Hackathon 2025 — INCOIS problem.</p>
+
+      <div class="features">
+        <span class="chip">Geo-tagged reports</span>
+        <span class="chip">Real-time alerts</span>
+        <span class="chip">Social analytics</span>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="top-row">
+        <div class="title">Welcome</div>
+        <a class="back-link" href="index.html">← Back to Home</a>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Auth tabs">
+        <button id="btnSignup" class="tab-btn active" role="tab" aria-selected="true">Sign Up</button>
+        <button id="btnLogin" class="tab-btn" role="tab" aria-selected="false">Login</button>
+      </div>
+
+      <!-- Signup -->
+      <form id="signupForm" class="form" onsubmit="event.preventDefault(); handleSignup();">
+        <div class="field">
+          <span class="icon" aria-hidden="true">👤</span>
+          <input id="su_name" type="text" placeholder="Full name" aria-label="Full name" required>
+        </div>
+
+        <div class="field">
+          <span class="icon" aria-hidden="true">📧</span>
+          <input id="su_email" type="email" placeholder="Email" aria-label="Email" required>
+        </div>
+
+        <div class="field" style="position:relative">
+          <span class="icon" aria-hidden="true">🔒</span>
+          <input id="su_password" type="password" placeholder="Password (min 6 chars)" aria-label="Password" required>
+          <span class="toggle-pass" id="su_toggle" title="Show password" onclick="togglePass('su_password','su_toggle')">👁</span>
+        </div>
+
+        <div class="field">
+          <span class="icon" aria-hidden="true">📞</span>
+          <input id="su_contact" type="text" placeholder="Contact number" aria-label="Contact number">
+        </div>
+
+        <div class="checkbox-row">
+          <label style="display:flex;gap:8px;align-items:center"><input id="su_loc" type="checkbox"> Allow Location Access</label>
+          <button class="secondary" type="button" onclick="showLogin()">Already have an account?</button>
+        </div>
+
+        <button class="primary" type="submit">Create Account</button>
+
+        <div class="small-muted">By signing up you agree to our <span class="link">Terms</span> and <span class="link">Privacy</span>.</div>
+      </form>
+
+      <!-- Login -->
+      <form id="loginForm" class="form" style="display:none" onsubmit="event.preventDefault(); handleLogin();">
+        <div class="field">
+          <span class="icon" aria-hidden="true">📧</span>
+          <input id="li_email" type="email" placeholder="Email" aria-label="Email" required>
+        </div>
+        <div class="field" style="position:relative">
+          <span class="icon" aria-hidden="true">🔒</span>
+          <input id="li_password" type="password" placeholder="Password" aria-label="Password" required>
+          <span class="toggle-pass" id="li_toggle" onclick="togglePass('li_password','li_toggle')">👁</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <label style="font-size:13px;color:var(--muted)"><input type="checkbox"> Remember me</label>
+          <a href="#" style="font-size:13px;color:var(--muted);text-decoration:none">Forgot?</a>
+        </div>
+
+        <button class="primary" type="submit">Sign In</button>
+
+        <div class="or-row" aria-hidden="true">or</div>
+
+        <button class="secondary" type="button" onclick="social('google')">Continue with Google</button>
+        <div class="footer-note">Need help? <a class="link" href="#">Contact support</a></div>
+      </form>
+
+    </div>
+  </div>
+
+  <script type="module">
+    // ---------- Firebase imports ----------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    // Firebase config (your project)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRq0DwS1ikDzvl27MTnG4lZfVDJT2lzxI",
+      authDomain: "hackathonapp-f8695.firebaseapp.com",
+      projectId: "hackathonapp-f8695",
+      storageBucket: "hackathonapp-f8695.appspot.com",
+      messagingSenderId: "1098082520052",
+      appId: "1:1098082520052:web:c51e92571d171c903947a1",
+      measurementId: "G-2L479LZ9QV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Tabs
+    const btnSignup = document.getElementById('btnSignup');
+    const btnLogin = document.getElementById('btnLogin');
+    const signupForm = document.getElementById('signupForm');
+    const loginForm = document.getElementById('loginForm');
+
+    btnSignup.onclick = () => {
+      btnSignup.classList.add('active'); btnSignup.setAttribute('aria-selected','true');
+      btnLogin.classList.remove('active'); btnLogin.setAttribute('aria-selected','false');
+      signupForm.style.display = 'grid'; loginForm.style.display = 'none';
+    }
+    btnLogin.onclick = () => {
+      btnLogin.classList.add('active'); btnLogin.setAttribute('aria-selected','true');
+      btnSignup.classList.remove('active'); btnSignup.setAttribute('aria-selected','false');
+      loginForm.style.display = 'grid'; signupForm.style.display = 'none';
+    }
+    window.showLogin = () => btnLogin.click();
+    window.showSignup = () => btnSignup.click();
+
+    // password toggle
+    window.togglePass = (id,btnId) => {
+      const inp = document.getElementById(id);
+      const btn = document.getElementById(btnId);
+      if(inp.type === 'password'){ inp.type = 'text'; btn.textContent = '🙈'; btn.title='Hide password' }
+      else { inp.type = 'password'; btn.textContent = '👁'; btn.title='Show password' }
+    }
+
+    // Sign up
+    window.handleSignup = async function(){
+      const name = document.getElementById('su_name').value.trim();
+      const email = document.getElementById('su_email').value.trim();
+      const pass = document.getElementById('su_password').value;
+      const contact = document.getElementById('su_contact').value.trim();
+      const locPerm = document.getElementById('su_loc').checked;
+
+      if(!name || !email || !pass){ alert('Please enter name, email and password'); return; }
+      if(pass.length < 6){ alert('Password must be at least 6 characters'); return; }
+
+      try{
+        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        const uid = userCred.user.uid;
+        await setDoc(doc(db, "users", uid), { name, email, contact, locationPerm: locPerm, createdAt: new Date() });
+        alert('✅ Account created — Redirecting to dashboard');
+        window.location.href = 'index.html?role=citizen';
+      } catch(e){
+        console.error(e);
+        alert('Signup error: ' + (e.message || e));
+      }
+    }
+
+    // Login
+    window.handleLogin = async function(){
+      const email = document.getElementById('li_email').value.trim();
+      const pass = document.getElementById('li_password').value;
+      if(!email || !pass){ alert('Please enter email and password'); return; }
+      try{
+        const userCred = await signInWithEmailAndPassword(auth, email, pass);
+        alert('✅ Logged in as ' + userCred.user.email);
+        window.location.href = 'index.html?role=citizen';
+      } catch(e){
+        console.error(e);
+        alert('Login error: ' + (e.message || e));
+      }
+    }
+
+    // placeholder social
+    window.social = (provider) => {
+      alert('Social sign-in ('+provider+') — implement if needed');
+    }
+
+    // close modal helper (not heavily used here but kept)
+    window.openModal = id => document.getElementById(id).style.display = 'flex';
+    window.closeModal = id => document.getElementById(id).style.display = 'none';
+  </script>
+</body>
+</html>

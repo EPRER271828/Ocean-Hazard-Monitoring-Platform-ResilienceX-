@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🌊 OceanSafe - SIH 2025</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- MAPBOX GL JS -->
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f8fafc;
+      color: #334155;
+      overflow-x: hidden;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(135deg, #111827, #374151);
+      color: white;
+      padding: 10px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    nav h2 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.4rem;
+    }
+
+    .search-container {
+      position: relative;
+      flex-grow: 1;
+      max-width: 300px;
+      margin: 0 20px;
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 8px 35px 8px 15px;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+
+    .search-bar::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .search-bar:focus {
+      outline: none;
+      background: rgba(255,255,255,0.25);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.7);
+      pointer-events: none;
+    }
+
+    .auth-buttons button,
+    .auth-buttons a.button {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 6px 15px;
+      margin-left: 8px;
+      border-radius: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 13px;
+    }
+
+    .auth-buttons button:hover,
+    .auth-buttons a.button:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.05);
+    }
+
+    /* Main Container */
+    .main-container {
+      position: relative;
+      top: 60px;
+      height: calc(100vh - 60px);
+      width: 100%;
+    }
+
+    /* View Toggle Navigation */
+    .view-toggle-nav {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 600;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border-radius: 25px;
+      padding: 6px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .view-toggle-nav button {
+      background: transparent;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      color: #64748b;
+      transition: all 0.3s ease;
+      margin: 0 3px;
+    }
+
+    .view-toggle-nav button.active {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .view-toggle-nav button:not(.active):hover {
+      background: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+    }
+
+    /* View Container */
+    .view-container {
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    .overview-view,
+    .map-view {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .overview-view.hidden,
+    .map-view.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
+    }
+
+    /* Overview Styles */
+    .overview-view {
+      padding: 60px 30px 30px 30px;
+      background: #f8fafc;
+      overflow-y: auto;
+    }
+
+    .overview-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px;
+      background: linear-gradient(135deg, #ffffff, #f1f5f9);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border-left: 5px solid #3b82f6;
+    }
+
+    .overview-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #1e40af;
+      font-weight: 700;
+    }
+
+    .overview-header p {
+      color: #64748b;
+      font-size: 1.2rem;
+      margin-bottom: 25px;
+    }
+
+    .overview-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .overview-actions button {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .overview-actions button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Stats Grid */
+    .overview-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .overview-stat-card {
+      background: white;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border-left: 4px solid;
+    }
+
+    .overview-stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    }
+
+    .overview-stat-card.reports { border-left-color: #3b82f6; }
+    .overview-stat-card.hazards { border-left-color: #ef4444; }
+    .overview-stat-card.social { border-left-color: #10b981; }
+    .overview-stat-card.resolved { border-left-color: #f59e0b; }
+
+    .overview-stat-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .overview-stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .overview-stat-card.reports .overview-stat-number { color: #3b82f6; }
+    .overview-stat-card.hazards .overview-stat-number { color: #ef4444; }
+    .overview-stat-card.social .overview-stat-number { color: #10b981; }
+    .overview-stat-card.resolved .overview-stat-number { color: #f59e0b; }
+
+    .overview-stat-label {
+      font-size: 1.1rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .overview-stat-subtitle {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    /* Charts */
+    .overview-charts {
+      display: none;
+    }
+
+    .overview-chart-card {
+      display: none;
+    }
+
+    /* Map View */
+    .map-view {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-section {
+      position: relative;
+      height: 90vh;
+      width: 100%;
+      background: #1e293b;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+
+    /* Floating Stats */
+    .floating-stats {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 500;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 280px;
+    }
+
+    .floating-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .floating-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .floating-card .number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .floating-card.reports .number { color: #2563eb; }
+    .floating-card.hazards .number { color: #ef4444; }
+    .floating-card.social .number { color: #10b981; }
+    .floating-card.resolved .number { color: #f59e0b; }
+
+    .floating-card .label {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Map Controls */
+    .map-controls {
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      transform: translateY(-50%);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .map-control-btn {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .map-control-btn:hover {
+      transform: scale(1.1);
+      background: white;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    /* Events Panel */
+    .events-trigger {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 500;
+    }
+
+    .events-btn {
+      background: rgba(37, 99, 235, 0.95);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    .events-btn:hover {
+      background: rgba(37, 99, 235, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4);
+    }
+
+    .alert-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .content-section {
+      height: 10vh;
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      padding: 15px 30px;
+      border-top: 3px solid #2563eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    }
+
+    .content-left h1 {
+      font-size: 1.4rem;
+      margin: 0 0 4px 0;
+      color: #1e40af;
+      font-weight: 700;
+    }
+
+    .content-left p {
+      margin: 0;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .action-buttons button {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+    }
+
+    .action-buttons button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Events Sidebar */
+    .events-sidebar {
+      position: fixed;
+      top: 60px;
+      right: -400px;
+      width: 380px;
+      height: calc(100vh - 60px);
+      background: white;
+      box-shadow: -6px 0 30px rgba(0,0,0,0.2);
+      z-index: 1500;
+      transition: right 0.4s ease;
+      overflow-y: auto;
+    }
+
+    .events-sidebar.open {
+      right: 0;
+    }
+
+    .sidebar-header {
+      padding: 25px;
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white;
+    }
+
+    .sidebar-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .event-count {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .events-list {
+      padding: 20px;
+    }
+
+    .event-item {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+      border-left: 4px solid;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .event-item:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    .event-item.tsunami { border-left-color: #dc2626; }
+    .event-item.storm { border-left-color: #ea580c; }
+    .event-item.waves { border-left-color: #d97706; }
+    .event-item.flood { border-left-color: #0891b2; }
+
+    .event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .event-type {
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: white;
+    }
+
+    .event-type.tsunami { background: #dc2626; }
+    .event-type.storm { background: #ea580c; }
+    .event-type.waves { background: #d97706; }
+    .event-type.flood { background: #0891b2; }
+
+    .event-time {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .event-location {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 6px;
+    }
+
+    .event-description {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+
+    .event-stats {
+      display: flex;
+      gap: 15px;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      width: 420px;
+      animation: modalFadeIn 0.3s ease;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      text-align: center;
+      color: #1e40af;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 12px 16px;
+      margin: 8px 0;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .modal-content input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .modal-content button {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 15px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .modal-content button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #64748b;
+      transition: color 0.3s ease;
+    }
+
+    .close-btn:hover {
+      color: #ef4444;
+    }
+
+    .toggle-text {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #64748b;
+    }
+
+    .toggle-text a {
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .toggle-text a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .overview-charts {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .floating-stats {
+        width: 240px;
+        gap: 8px;
+      }
+
+      .floating-card {
+        padding: 12px;
+      }
+
+      .content-section {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+      }
+
+      .action-buttons {
+        margin-top: 10px;
+      }
+
+      .events-sidebar {
+        width: 100%;
+        right: -100%;
+      }
+
+      .search-container {
+        max-width: 200px;
+        margin: 0 15px;
+      }
+
+      nav {
+        padding: 0 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav>
+    <h2>🌊 OceanSafe</h2>
+    <div class="search-container">
+      <input type="text" class="search-bar" id="searchBar" placeholder="Search locations, hazards...">
+      <span class="search-icon">🔍</span>
+    </div>
+    <div class="auth-buttons" id="authButtonsContainer">
+      <a class="button" href="auth.html">Citizen Login</a>
+      <button onclick="openModal('adminModal')">Admin</button>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    
+    <!-- View Toggle Navigation -->
+    <div class="view-toggle-nav">
+      <button id="overviewBtn" class="active" onclick="switchToOverview()">📊 Overview</button>
+      <button id="mapBtn" onclick="switchToMap()">🗺 Live Map</button>
+    </div>
+
+    <!-- View Container -->
+    <div class="view-container">
+      
+      <!-- OVERVIEW VIEW -->
+      <div class="overview-view" id="overviewView">
+        <div class="overview-header">
+          <h1 id="mainHeader">Ocean Hazard Monitoring Platform</h1>
+          <p id="subText">Real-time crowdsourced reporting & social media analytics for coastal safety</p>
+          <div class="overview-actions">
+            <button id="submitBtn">📝 Submit Report</button>
+            <button id="analyticsBtn">📊 View Analytics</button>
+            <button onclick="switchToMap()">🗺 View Live Map</button>
+            <button onclick="showCharts()">📈 Detailed Charts</button>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="overview-stats">
+          <div class="overview-stat-card reports">
+            <span class="overview-stat-icon">📊</span>
+            <span class="overview-stat-number" id="reportCountOverview">128</span>
+            <div class="overview-stat-label">Total Reports</div>
+            <div class="overview-stat-subtitle">+12 in last 24hrs</div>
+          </div>
+          <div class="overview-stat-card hazards">
+            <span class="overview-stat-icon">🚨</span>
+            <span class="overview-stat-number">8</span>
+            <div class="overview-stat-label">Active Hazards</div>
+            <div class="overview-stat-subtitle">3 critical alerts</div>
+          </div>
+          <div class="overview-stat-card social">
+            <span class="overview-stat-icon">📱</span>
+            <span class="overview-stat-number">542</span>
+            <div class="overview-stat-label">Social Mentions</div>
+            <div class="overview-stat-subtitle">Trending: #TsunamiAlert</div>
+          </div>
+          <div class="overview-stat-card resolved">
+            <span class="overview-stat-icon">✅</span>
+            <span class="overview-stat-number">67</span>
+            <div class="overview-stat-label">Resolved Issues</div>
+            <div class="overview-stat-subtitle">94% resolution rate</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="overview-charts">
+          <div class="overview-chart-card">
+            <h3>📈 Hazard Reports Trend</h3>
+            <canvas id="barChart"></canvas>
+          </div>
+          <div class="overview-chart-card">
+            <h3>🥧 Reports by Category</h3>
+            <canvas id="pieChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAP VIEW -->
+      <div class="map-view hidden" id="mapView">
+        <div class="map-section">
+          <div id="map"></div>
+          
+          <!-- Floating Stats -->
+          <div class="floating-stats">
+            <div class="floating-card reports">
+              <span class="number" id="reportCount">128</span>
+              <span class="label">Reports</span>
+            </div>
+            <div class="floating-card hazards">
+              <span class="number">8</span>
+              <span class="label">Active</span>
+            </div>
+            <div class="floating-card social">
+              <span class="number">542</span>
+              <span class="label">Social</span>
+            </div>
+            <div class="floating-card resolved">
+              <span class="number">67</span>
+              <span class="label">Resolved</span>
+            </div>
+          </div>
+
+          <!-- Map Controls -->
+          <div class="map-controls">
+            <button class="map-control-btn" onclick="toggleHeatmap()" title="Heatmap">🔥</button>
+            <button class="map-control-btn" onclick="toggleClusters()" title="Clusters">📍</button>
+            <button class="map-control-btn" onclick="refreshData()" title="Refresh">🔄</button>
+            <button class="map-control-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+          </div>
+
+          <!-- Events Panel Trigger -->
+          <div class="events-trigger">
+            <button class="events-btn" onclick="toggleEventsPanel()">
+              Live Events
+              <span class="alert-badge">8</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+          <div class="content-left">
+            <h1>🗺 Live Hazard Map</h1>
+            <p>Real-time visualization of ocean hazards across India's coastline</p>
+          </div>
+          <div class="action-buttons">
+            <button onclick="switchToOverview()">📊 Back to Overview</button>
+            <button onclick="toggleEventsPanel()">📋 Events Panel</button>
+            <button onclick="askForLocation()">📍 My Location</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Events Sidebar -->
+  <div class="events-sidebar" id="eventsSidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">🚨 Live Events</div>
+      <div class="event-count">8 active incidents</div>
+    </div>
+    <div class="events-list" id="eventsList">
+      <div class="event-item tsunami">
+        <div class="event-header">
+          <span class="event-type tsunami">Tsunami</span>
+          <span class="event-time">15 mins ago</span>
+        </div>
+        <div class="event-location">📍 Chennai Coast</div>
+        <div class="event-description">Unusual wave patterns reported by fishermen</div>
+        <div class="event-stats">
+          <span>📊 23 reports</span>
+          <span>⚠ Critical</span>
+        </div>
+      </div>
+
+      <div class="event-item storm">
+        <div class="event-header">
+          <span class="event-type storm">Storm</span>
+          <span class="event-time">32 mins ago</span>
+        </div>
+        <div class="event-location">📍 Mumbai Harbor</div>
+        <div class="event-description">Storm surge warning for next 6 hours</div>
+        <div class="event-stats">
+          <span>📊 45 reports</span>
+          <span>⚠ High</span>
+        </div>
+      </div>
+
+      <div class="event-item waves">
+        <div class="event-header">
+          <span class="event-type waves">High Waves</span>
+          <span class="event-time">1 hour ago</span>
+        </div>
+        <div class="event-location">📍 Kochi Backwaters</div>
+        <div class="event-description">Wave height exceeding 4 meters</div>
+        <div class="event-stats">
+          <span>📊 18 reports</span>
+          <span>⚠ Medium</span>
+        </div>
+      </div>
+
+      <div class="event-item flood">
+        <div class="event-header">
+          <span class="event-type flood">Flooding</span>
+          <span class="event-time">2 hours ago</span>
+        </div>
+        <div class="event-location">📍 Visakhapatnam Port</div>
+        <div class="event-description">Coastal flooding near port area</div>
+        <div class="event-stats">
+          <span>📊 31 reports</span>
+          <span>⚠ High</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="signupModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('signupModal')">&times;</span>
+      <h3>Sign Up</h3>
+      <input type="text" id="fullName" placeholder="Full Name" required />
+      <input type="email" id="signupEmail" placeholder="Email" required />
+      <input type="password" id="signupPassword" placeholder="Password" required />
+      <input type="text" id="contact" placeholder="Contact Number" required />
+      <label><input type="checkbox" id="locationPerm"> Allow Location Access</label><br>
+      <label><input type="checkbox" id="smsPerm"> Allow SMS Alerts</label><br><br>
+      <button onclick="signupUser()">Create Account</button>
+      <p class="toggle-text">Already have an account? <a href="auth.html">Login</a></p>
+    </div>
+  </div>
+
+  <div id="adminModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
+      <h3>Admin Login</h3>
+      <input type="text" id="adminEmail" placeholder="Admin Email" required />
+      <input type="password" id="adminPassword" placeholder="Password" required />
+      <button onclick="adminLogin()">Login</button>
+    </div>
+  </div>
+
+  <script type="module">
+    // Firebase imports and setup
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      setDoc 
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRq0DwS1ikDzvl27MTnG4lZfVDJT2lzxI",
+      authDomain: "hackathonapp-f8695.firebaseapp.com",
+      projectId: "hackathonapp-f8695",
+      storageBucket: "hackathonapp-f8695.appspot.com",
+      messagingSenderId: "1098082520052",
+      appId: "1:1098082520052:web:c51e92571d171c903947a1",
+      measurementId: "G-2L479LZ9QV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Admin credentials
+    const ADMIN_EMAIL = "admin@gmail.com";
+    const ADMIN_PASS = "admin@123";
+
+    // Role management
+    const urlParams = new URLSearchParams(window.location.search);
+    let role = urlParams.get('role') || "guest";
+
+    const headerTitle = document.getElementById("mainHeader");
+    const subText = document.getElementById("subText");
+    const submitBtn = document.getElementById("submitBtn");
+    const analyticsBtn = document.getElementById("analyticsBtn");
+    const authButtonsContainer = document.getElementById("authButtonsContainer");
+
+    function renderAuthButtons(r){
+      if(r === "admin" || r === "citizen"){
+        authButtonsContainer.innerHTML = `
+          <button class="button" onclick="logout()">Logout</button>
+        `;
+      } else {
+        authButtonsContainer.innerHTML = `
+          <a class="button" href="auth.html">Citizen Login</a>
+          <button onclick="openModal('adminModal')">Admin</button>
+        `;
+      }
+    }
+
+    function applyRoleUI(r){
+      if(r === "admin"){
+        if(headerTitle) headerTitle.textContent = "🔐 Admin Command Center";
+        if(subText) subText.textContent = "Administrative controls and system monitoring";
+      } 
+      else if(r === "citizen"){
+        if(headerTitle) headerTitle.textContent = "👤 Citizen Reporter";
+        if(subText) subText.textContent = "Submit geotagged reports and track hazard status";
+        setTimeout(() => askForLocation(), 300);
+      } 
+      else {
+        if(headerTitle) headerTitle.textContent = "👋 Ocean Hazard Monitoring Platform";
+        if(subText) subText.textContent = "Real-time crowdsourced reporting & social media analytics";
+      }
+      renderAuthButtons(r);
+    }
+
+    applyRoleUI(role);
+
+    // View switching functions
+    window.switchToOverview = function() {
+      document.getElementById('overviewView').classList.remove('hidden');
+      document.getElementById('mapView').classList.add('hidden');
+      document.getElementById('overviewBtn').classList.add('active');
+      document.getElementById('mapBtn').classList.remove('active');
+      setTimeout(initializeCharts, 100);
+    }
+
+    window.switchToMap = function() {
+      document.getElementById('overviewView').classList.add('hidden');
+      document.getElementById('mapView').classList.remove('hidden');
+      document.getElementById('overviewBtn').classList.remove('active');
+      document.getElementById('mapBtn').classList.add('active');
+      setTimeout(() => {
+        if (window.map && window.map.resize) {
+          window.map.resize();
+        }
+      }, 100);
+    }
+
+    // Global functions
+    window.logout = async function(){
+      try{
+        if(auth && typeof signOut === 'function'){
+          await signOut(auth);
+        }
+      } catch(e){
+        console.warn('Signout error:', e);
+      }
+      window.location.href = 'index.html';
+    }
+
+    window.openModal = function(id){ 
+      document.getElementById(id).style.display = "flex"; 
+    }
+
+    window.closeModal = function(id){ 
+      document.getElementById(id).style.display = "none"; 
+    }
+
+    window.onclick = (e) => { 
+      if (e.target.classList && e.target.classList.contains('modal')) 
+        e.target.style.display = 'none'; 
+    }
+
+    window.toggleEventsPanel = function() {
+      const sidebar = document.getElementById('eventsSidebar');
+      sidebar.classList.toggle('open');
+    }
+
+    window.adminLogin = function(){
+      const email = document.getElementById("adminEmail").value.trim();
+      const pass = document.getElementById("adminPassword").value.trim();
+
+      if(email === ADMIN_EMAIL && pass === ADMIN_PASS){
+        alert("✅ Admin Logged In");
+        closeModal('adminModal');
+        window.location.href = "index.html?role=admin";
+      } else {
+        alert("❌ Invalid Admin Credentials");
+      }
+    }
+
+    window.signupUser = async function () {
+      const name = document.getElementById('fullName').value;
+      const email = document.getElementById('signupEmail').value;
+      const pass = document.getElementById('signupPassword').value;
+      const contact = document.getElementById('contact').value;
+      const locationPerm = document.getElementById('locationPerm').checked;
+      const smsPerm = document.getElementById('smsPerm').checked;
+
+      if (!email || !pass) {
+        alert('Please fill email and password');
+        return;
+      }
+
+      try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+        const uid = userCred.user.uid;
+
+        await setDoc(doc(db, "users", uid), {
+          name, email, contact, locationPerm, smsPerm, createdAt: new Date()
+        });
+
+        alert('✅ User registered!');
+        closeModal('signupModal');
+        window.location.href = 'index.html?role=citizen';
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    window.showCharts = function() {
+      alert('Charts view - will implement detailed analytics');
+    }
+
+    // Initialize Charts
+    function initializeCharts() {
+      const barCtx = document.getElementById('barChart');
+      if (barCtx && !barCtx.chart) {
+        barCtx.chart = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: ['High Waves','Coastal Flood','Tsunami','Storm Surge'],
+            datasets: [{ 
+              label:'Reports', 
+              data:[45,31,12,18], 
+              backgroundColor:['#3b82f6','#0891b2','#dc2626','#ea580c'],
+              borderRadius: 8,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, grid: { display: false } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      const pieCtx = document.getElementById('pieChart');
+      if (pieCtx && !pieCtx.chart) {
+        pieCtx.chart = new Chart(pieCtx, {
+          type: 'doughnut',
+          data: { 
+            labels:['Resolved','In Progress','Critical'], 
+            datasets: [{ 
+              data:[67,53,8], 
+              backgroundColor:['#10b981','#f59e0b','#ef4444'],
+              borderWidth: 0
+            }] 
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { 
+                position: 'bottom',
+                labels: { padding: 20, usePointStyle: true }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    setTimeout(initializeCharts, 500);
+
+    // Mapbox Implementation
+    mapboxgl.accessToken = 'pk.eyJ1Ijoibi1tLTc3NyIsImEiOiJjbWY5bTZteG0xYmt1MmlwZmZ1MDFhcXowIn0.hpURL94emG4qMoXAmP0eZA'; // Replace with your Mapbox token
+    
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/dark-v11',
+      center: [78.96, 20.59],
+      zoom: 5,
+      pitch: 0,
+      bearing: 0
+    });
+
+    const hazardData = {
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "geometry": { "type": "Point", "coordinates": [80.2707, 13.0827] },
+          "properties": { 
+            "type": "tsunami", 
+            "title": "Tsunami Alert", 
+            "location": "Chennai Coast",
+            "description": "Unusual wave patterns reported by local fishermen",
+            "severity": "Critical",
+            "reports": 23,
+            "time": "15 mins ago"
+          }
+        },
+        {
+          "type": "Feature", 
+          "geometry": { "type": "Point", "coordinates": [72.8347, 18.9220] },
+          "properties": { 
+            "type": "storm", 
+            "title": "Storm Surge", 
+            "location": "Mumbai Harbor",
+            "description": "Storm surge warning issued for next 6 hours",
+            "severity": "High",
+            "reports": 45,
+            "time": "32 mins ago"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": { "type": "Point", "coordinates": [76.2673, 9.9312] },
+          "properties": { 
+            "type": "waves", 
+            "title": "High Waves", 
+            "location": "Kochi Backwaters",
+            "description": "High waves causing flooding in coastal areas",
+            "severity": "Medium",
+            "reports": 18,
+            "time": "1 hour ago"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": { "type": "Point", "coordinates": [83.2185, 17.6868] },
+          "properties": { 
+            "type": "flood", 
+            "title": "Coastal Flood", 
+            "location": "Visakhapatnam Port",
+            "description": "Coastal flooding reported near port area",
+            "severity": "High", 
+            "reports": 31,
+            "time": "2 hours ago"
+          }
+        },
+        {
+          "type": "Feature",
+          "geometry": { "type": "Point", "coordinates": [74.1240, 15.2993] },
+          "properties": { 
+            "type": "tsunami", 
+            "title": "Critical Alert", 
+            "location": "Goa Beaches",
+            "description": "Sudden water recession observed",
+            "severity": "Critical",
+            "reports": 12,
+            "time": "45 mins ago"
+          }
+        }
+      ]
+    };
+
+    map.on('load', () => {
+      console.log('🗺 Mapbox loaded successfully!');
+      
+      map.addSource('hazards', {
+        'type': 'geojson',
+        'data': hazardData
+      });
+
+      map.addLayer({
+        'id': 'hazard-markers',
+        'type': 'circle',
+        'source': 'hazards',
+        'paint': {
+          'circle-radius': [
+            'case',
+            ['==', ['get', 'severity'], 'Critical'], 20,
+            ['==', ['get', 'severity'], 'High'], 16,
+            12
+          ],
+          'circle-color': [
+            'case',
+            ['==', ['get', 'type'], 'tsunami'], '#dc2626',
+            ['==', ['get', 'type'], 'storm'], '#ea580c',
+            ['==', ['get', 'type'], 'waves'], '#d97706',
+            ['==', ['get', 'type'], 'flood'], '#0891b2',
+            '#64748b'
+          ],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 3,
+          'circle-opacity': 0.9
+        }
+      });
+
+      map.addLayer({
+        'id': 'hazard-symbols',
+        'type': 'symbol',
+        'source': 'hazards',
+        'layout': {
+          'text-field': [
+            'case',
+            ['==', ['get', 'type'], 'tsunami'], '🌊',
+            ['==', ['get', 'type'], 'storm'], '🌀',
+            ['==', ['get', 'type'], 'waves'], '🌊',
+            ['==', ['get', 'type'], 'flood'], '💧',
+            '⚠'
+          ],
+          'text-size': 18,
+          'text-allow-overlap': true,
+          'text-ignore-placement': true
+        }
+      });
+
+      map.on('click', 'hazard-markers', (e) => {
+        const properties = e.features[0].properties;
+        const coordinates = e.features[0].geometry.coordinates.slice();
+
+        const popupContent = `
+          <div style="font-family: 'Segoe UI', sans-serif; min-width: 200px;">
+            <div style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 12px; margin: -10px -10px 10px -10px; border-radius: 8px 8px 0 0;">
+              <strong style="font-size: 16px;">${properties.title}</strong>
+            </div>
+            <div style="padding: 0 5px;">
+              <p style="margin: 8px 0; color: #64748b; font-size: 13px;"><strong>📍 Location:</strong> ${properties.location}</p>
+              <p style="margin: 8px 0; color: #64748b; font-size: 12px; line-height: 1.4;">${properties.description}</p>
+              <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: #64748b;">
+                <span><strong>📊 ${properties.reports} reports</strong></span>
+                <span><strong>⚠ ${properties.severity}</strong></span>
+              </div>
+              <div style="text-align: center; margin-top: 8px; font-size: 11px; color: #94a3b8;">
+                ${properties.time}
+              </div>
+            </div>
+          </div>
+        `;
+
+        new mapboxgl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(popupContent)
+          .addTo(map);
+      });
+
+      map.on('mouseenter', 'hazard-markers', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.on('mouseleave', 'hazard-markers', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+      map.addControl(new mapboxgl.FullscreenControl(), 'bottom-right');
+    });
+
+    // User location
+    let userLocationMarker = null;
+
+    window.askForLocation = function() {
+      if (!navigator.geolocation) {
+        alert("Geolocation not supported by this browser.");
+        return;
+      }
+
+      const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+
+      navigator.geolocation.getCurrentPosition(
+        function success(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          
+          if (userLocationMarker) {
+            userLocationMarker.remove();
+          }
+
+          userLocationMarker = new mapboxgl.Marker({
+            color: '#2563eb',
+            scale: 0.8
+          })
+          .setLngLat([lon, lat])
+          .setPopup(new mapboxgl.Popup().setHTML('<strong>📍 Your Location</strong>'))
+          .addTo(map);
+
+          map.flyTo({
+            center: [lon, lat],
+            zoom: 12,
+            duration: 2000
+          });
+        },
+        function error(err) {
+          console.warn('Geolocation error', err);
+          alert("Unable to get location. Please allow location access.");
+        },
+        options
+      );
+    }
+
+    // Map controls
+    window.toggleHeatmap = function() {
+      console.log('🔥 Heatmap toggled');
+      
+      if (map.getLayer('hazard-heatmap')) {
+        map.removeLayer('hazard-heatmap');
+        map.removeSource('hazard-heatmap-source');
+      } else {
+        map.addSource('hazard-heatmap-source', {
+          'type': 'geojson',
+          'data': hazardData
+        });
+
+        map.addLayer({
+          'id': 'hazard-heatmap',
+          'type': 'heatmap',
+          'source': 'hazard-heatmap-source',
+          'maxzoom': 15,
+          'paint': {
+            'heatmap-weight': [
+              'case',
+              ['==', ['get', 'severity'], 'Critical'], 1,
+              ['==', ['get', 'severity'], 'High'], 0.7,
+              0.4
+            ],
+            'heatmap-intensity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 1,
+              15, 3
+            ],
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(33,102,172,0)',
+              0.2, 'rgb(103,169,207)',
+              0.4, 'rgb(209,229,240)', 
+              0.6, 'rgb(253,219,199)',
+              0.8, 'rgb(239,138,98)',
+              1, 'rgb(178,24,43)'
+            ],
+            'heatmap-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 20,
+              15, 40
+            ]
+          }
+        }, 'hazard-markers');
+      }
+    }
+
+    window.toggleClusters = function() {
+      console.log('📍 Clusters toggled');
+      if (map.getLayoutProperty('hazard-markers', 'visibility') === 'visible') {
+        map.setLayoutProperty('hazard-markers', 'visibility', 'none');
+        map.setLayoutProperty('hazard-symbols', 'visibility', 'none');
+      } else {
+        map.setLayoutProperty('hazard-markers', 'visibility', 'visible');
+        map.setLayoutProperty('hazard-symbols', 'visibility', 'visible');
+      }
+    }
+
+    window.refreshData = function() {
+      console.log('🔄 Refreshing map data...');
+      
+      const refreshButton = document.querySelector('.map-control-btn[title="Refresh"]');
+      refreshButton.style.transform = 'rotate(360deg)';
+      refreshButton.style.transition = 'transform 1s ease';
+      
+      setTimeout(() => {
+        const updatedData = {...hazardData};
+        updatedData.features.forEach(feature => {
+          feature.properties.reports += Math.floor(Math.random() * 3);
+        });
+        
+        map.getSource('hazards').setData(updatedData);
+        refreshButton.style.transform = 'rotate(0deg)';
+        console.log('✅ Map data refreshed');
+      }, 1000);
+    }
+
+    window.toggleFullscreen = function() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    window.map = map;
+
+    document.getElementById('searchBar').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      console.log('🔍 Searching for:', searchTerm);
+      
+      if (searchTerm.length > 2) {
+        const filteredFeatures = hazardData.features.filter(feature => 
+          feature.properties.location.toLowerCase().includes(searchTerm) ||
+          feature.properties.type.toLowerCase().includes(searchTerm) ||
+          feature.properties.title.toLowerCase().includes(searchTerm)
+        );
+
+        if (filteredFeatures.length > 0) {
+          const bounds = new mapboxgl.LngLatBounds();
+          filteredFeatures.forEach(feature => {
+            bounds.extend(feature.geometry.coordinates);
+          });
+          map.fitBounds(bounds, { padding: 50 });
+        }
+      }
+    });
+
+    console.log('🌊 OceanSafe Dashboard with Mapbox loaded successfully!');
+
+  </script>
+</body>
+</html>
