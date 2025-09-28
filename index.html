@@ -12,7 +12,7 @@
   <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
 
-  <!-- Firebase -->
+  <!-- Firebase v8 (keeping original version) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -179,62 +179,112 @@
       transform: translateY(20px);
     }
 
-    /* Overview Styles */
+    /* Enhanced Overview Styles */
     .overview-view {
-      padding: 60px 30px 30px 30px;
-      background: #f8fafc;
+      padding: 60px 20px 20px 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       overflow-y: auto;
     }
 
     .overview-header {
-      text-align: center;
-      margin-bottom: 40px;
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white;
       padding: 30px;
-      background: linear-gradient(135deg, #ffffff, #f1f5f9);
       border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      border-left: 5px solid #3b82f6;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .overview-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/><circle cx="50" cy="50" r="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>') no-repeat center;
+      opacity: 0.3;
+    }
+
+    .overview-header-content {
+      position: relative;
+      z-index: 1;
     }
 
     .overview-header h1 {
       font-size: 2.5rem;
-      margin-bottom: 10px;
-      color: #1e40af;
       font-weight: 700;
+      margin-bottom: 10px;
     }
 
     .overview-header p {
-      color: #64748b;
       font-size: 1.2rem;
+      opacity: 0.9;
       margin-bottom: 25px;
     }
 
     .overview-actions {
       display: flex;
       gap: 15px;
-      justify-content: center;
       flex-wrap: wrap;
     }
 
     .overview-actions button {
-      background: linear-gradient(135deg, #2563eb, #3b82f6);
-      border: none;
+      background: rgba(255, 255, 255, 0.2);
       color: white;
+      border: none;
       padding: 12px 24px;
-      border-radius: 12px;
+      border-radius: 25px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 14px;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      backdrop-filter: blur(10px);
     }
 
     .overview-actions button:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
     }
 
-    /* Stats Grid */
+    .overview-actions button.primary {
+      background: white;
+      color: #1e40af;
+    }
+
+    .overview-actions button.primary:hover {
+      background: #f1f5f9;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      animation: alertPulse 2s infinite;
+    }
+
+    @keyframes alertPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.9; }
+    }
+
+    .alert-icon {
+      font-size: 2rem;
+      animation: bounce 1s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    /* Enhanced Stats Grid */
     .overview-stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -245,40 +295,78 @@
     .overview-stat-card {
       background: white;
       padding: 30px;
-      border-radius: 18px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-      text-align: center;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
       position: relative;
       overflow: hidden;
       transition: all 0.3s ease;
-      border-left: 4px solid;
+      border-left: 5px solid;
     }
 
     .overview-stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
     }
 
     .overview-stat-card.reports { border-left-color: #3b82f6; }
-    .overview-stat-card.hazards { border-left-color: #ef4444; }
+    .overview-stat-card.hazards { border-left-color: #dc2626; }
     .overview-stat-card.social { border-left-color: #10b981; }
     .overview-stat-card.resolved { border-left-color: #f59e0b; }
 
+    .overview-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      opacity: 0.1;
+      border-radius: 50%;
+    }
+
+    .overview-stat-card.reports::before { background: #3b82f6; }
+    .overview-stat-card.hazards::before { background: #dc2626; }
+    .overview-stat-card.social::before { background: #10b981; }
+    .overview-stat-card.resolved::before { background: #f59e0b; }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
     .overview-stat-icon {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      display: block;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .stat-trend {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .stat-trend.up {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .stat-trend.down {
+      background: #f0fdf4;
+      color: #16a34a;
     }
 
     .overview-stat-number {
       font-size: 3rem;
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: block;
     }
 
     .overview-stat-card.reports .overview-stat-number { color: #3b82f6; }
-    .overview-stat-card.hazards .overview-stat-number { color: #ef4444; }
+    .overview-stat-card.hazards .overview-stat-number { color: #dc2626; }
     .overview-stat-card.social .overview-stat-number { color: #10b981; }
     .overview-stat-card.resolved .overview-stat-number { color: #f59e0b; }
 
@@ -286,24 +374,195 @@
       font-size: 1.1rem;
       color: #64748b;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
 
     .overview-stat-subtitle {
       font-size: 0.9rem;
       color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
-    /* Charts */
-    .overview-charts {
-      display: none;
+    /* Quick Stats Bar */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
     }
 
-    .overview-chart-card {
-      display: none;
+    .quick-stat {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      text-align: center;
+      transition: all 0.3s ease;
     }
 
-    /* Map View */
+    .quick-stat:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+
+    .quick-stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #3b82f6;
+      margin-bottom: 5px;
+    }
+
+    .quick-stat-label {
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    /* Activity Timeline */
+    .timeline-section {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .timeline-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1e40af;
+    }
+
+    .timeline-filter {
+      display: flex;
+      gap: 10px;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748b;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn.active {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .timeline-list {
+      position: relative;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: #f8fafc;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .timeline-item:hover {
+      background: #f1f5f9;
+      transform: translateX(5px);
+    }
+
+    .timeline-indicator {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .timeline-indicator.critical { background: #dc2626; }
+    .timeline-indicator.warning { background: #f59e0b; }
+    .timeline-indicator.info { background: #3b82f6; }
+    .timeline-indicator.success { background: #10b981; }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-title-text {
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 5px;
+    }
+
+    .timeline-description {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .timeline-meta {
+      display: flex;
+      gap: 15px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* Enhanced Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .metrics-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .metrics-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chart-placeholder {
+      height: 200px;
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-weight: 600;
+      border: 2px dashed #cbd5e1;
+    }
+
+    /* Map View Styles */
     .map-view {
       display: flex;
       flex-direction: column;
@@ -522,9 +781,33 @@
     }
 
     .sidebar-header {
+      position: relative;
       padding: 25px;
       background: linear-gradient(135deg, #1e40af, #3b82f6);
       color: white;
+    }
+
+    .sidebar-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.12);
+      color: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, transform 0.12s ease;
+    }
+
+    .sidebar-close-btn:hover {
+      background: rgba(255,255,255,0.22);
+      transform: translateY(-1px);
     }
 
     .sidebar-title {
@@ -647,7 +930,9 @@
       margin-bottom: 25px;
     }
 
-    .modal-content input {
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
       width: 100%;
       padding: 12px 16px;
       margin: 8px 0;
@@ -657,7 +942,9 @@
       transition: all 0.3s ease;
     }
 
-    .modal-content input:focus {
+    .modal-content input:focus,
+    .modal-content select:focus,
+    .modal-content textarea:focus {
       outline: none;
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -725,14 +1012,26 @@
       }
     }
 
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .overview-charts {
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .overview-stats {
         grid-template-columns: 1fr;
       }
-    }
 
-    @media (max-width: 768px) {
+      .quick-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+
       .floating-stats {
         width: 240px;
         gap: 8px;
@@ -765,6 +1064,14 @@
       nav {
         padding: 0 15px;
       }
+
+      .overview-header h1 {
+        font-size: 2rem;
+      }
+
+      .overview-actions {
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -786,65 +1093,218 @@
   <!-- Main Container -->
   <div class="main-container">
     
-    <!-- View Toggle Navigation -->
+    <!-- View Toggle Navigation 
     <div class="view-toggle-nav">
-      <button id="overviewBtn" class="active" onclick="switchToOverview()">📊 Overview</button>
+      <button id="overviewBtn" class="active" onclick="switchToOverview()">📊 Dashboard</button>
       <button id="mapBtn" onclick="switchToMap()">🗺 Live Map</button>
     </div>
-
+    -->
     <!-- View Container -->
     <div class="view-container">
       
-      <!-- OVERVIEW VIEW -->
+      <!-- ENHANCED OVERVIEW VIEW -->
       <div class="overview-view" id="overviewView">
+        
+        <!-- Header Section -->
         <div class="overview-header">
-          <h1 id="mainHeader">Ocean Hazard Monitoring Platform</h1>
-          <p id="subText">Real-time crowdsourced reporting & social media analytics for coastal safety</p>
-          <div class="overview-actions">
-            <button id="submitBtn">📝 Submit Report</button>
-            <button id="analyticsBtn">📊 View Analytics</button>
-            <button onclick="switchToMap()">🗺 View Live Map</button>
-            <button onclick="showCharts()">📈 Detailed Charts</button>
+          <div class="overview-header-content">
+            <h1 id="mainHeader">Ocean Hazard Command Center</h1>
+            <p id="subText">Real-time monitoring and response coordination for India's coastal safety</p>
+            <div class="overview-actions">
+              <button class="primary" onclick="openModal('reportModall')">📝 Submit New Report</button>
+              <button onclick="switchToMap()">🗺 View Live Map</button>
+              <button onclick="showAnalyticss()">📊 Analytics Dashboard</button>
+              <button onclick="showEmergencyResponse()">🚨 Emergency Response</button>
+            </div>
           </div>
         </div>
 
-        <!-- Stats Grid -->
+        <!-- Alert Banner -->
+        <div class="alert-banner">
+          <div class="alert-icon">⚠️</div>
+          <div>
+            <strong>Critical Alert:</strong> Tsunami warning active for Chennai Coast. 
+            <span style="margin-left: 10px;">
+              <button style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 12px; border-radius: 15px; cursor: pointer;" onclick="showAlertDetails()">View Details</button>
+            </span>
+          </div>
+        </div>
+
+        <!-- Enhanced Stats Overview -->
         <div class="overview-stats">
-          <div class="overview-stat-card reports">
-            <span class="overview-stat-icon">📊</span>
-            <span class="overview-stat-number" id="reportCountOverview">128</span>
-            <div class="overview-stat-label">Total Reports</div>
-            <div class="overview-stat-subtitle">+12 in last 24hrs</div>
-          </div>
           <div class="overview-stat-card hazards">
-            <span class="overview-stat-icon">🚨</span>
-            <span class="overview-stat-number">8</span>
-            <div class="overview-stat-label">Active Hazards</div>
-            <div class="overview-stat-subtitle">3 critical alerts</div>
+            <div class="stat-header">
+              <div class="overview-stat-icon">🚨</div>
+              <div class="stat-trend up">↑ 15%</div>
+            </div>
+            <span class="overview-stat-number" id="criticalHazards">8</span>
+            <div class="overview-stat-label">Critical Hazards</div>
+            <div class="overview-stat-subtitle">
+              <span>3 tsunami alerts</span>
+              <span>•</span>
+              <span>Active now</span>
+            </div>
           </div>
-          <div class="overview-stat-card social">
-            <span class="overview-stat-icon">📱</span>
-            <span class="overview-stat-number">542</span>
-            <div class="overview-stat-label">Social Mentions</div>
-            <div class="overview-stat-subtitle">Trending: #TsunamiAlert</div>
+
+          <div class="overview-stat-card reports">
+            <div class="stat-header">
+              <div class="overview-stat-icon">📊</div>
+              <div class="stat-trend up">↑ 23%</div>
+            </div>
+            <span class="overview-stat-number" id="totalReports">1247</span>
+            <div class="overview-stat-label">Total Reports</div>
+            <div class="overview-stat-subtitle">
+              <span>+47 today</span>
+              <span>•</span>
+              <span>96% verified</span>
+            </div>
           </div>
+
           <div class="overview-stat-card resolved">
-            <span class="overview-stat-icon">✅</span>
-            <span class="overview-stat-number">67</span>
+            <div class="stat-header">
+              <div class="overview-stat-icon">✅</div>
+              <div class="stat-trend down">↓ 8%</div>
+            </div>
+            <span class="overview-stat-number" id="resolvedIssues">234</span>
             <div class="overview-stat-label">Resolved Issues</div>
-            <div class="overview-stat-subtitle">94% resolution rate</div>
+            <div class="overview-stat-subtitle">
+              <span>94% success rate</span>
+              <span>•</span>
+              <span>Avg 2.3h response</span>
+            </div>
+          </div>
+
+          <div class="overview-stat-card social">
+            <div class="stat-header">
+              <div class="overview-stat-icon">📱</div>
+              <div class="stat-trend up">↑ 156%</div>
+            </div>
+            <span class="overview-stat-number" id="socialMentions">12.4K</span>
+            <div class="overview-stat-label">Social Mentions</div>
+            <div class="overview-stat-subtitle">
+              <span>#TsunamiAlert trending</span>
+              <span>•</span>
+              <span>68% concern level</span>
+            </div>
           </div>
         </div>
 
-        <!-- Charts -->
-        <div class="overview-charts">
-          <div class="overview-chart-card">
-            <h3>📈 Hazard Reports Trend</h3>
-            <canvas id="barChart"></canvas>
+        <!-- Quick Stats Bar -->
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <div class="quick-stat-number" id="activeReporters">15</div>
+            <div class="quick-stat-label">Active Reporters</div>
           </div>
-          <div class="overview-chart-card">
-            <h3>🥧 Reports by Category</h3>
-            <canvas id="pieChart"></canvas>
+          <div class="quick-stat">
+            <div class="quick-stat-number">7.2M</div>
+            <div class="quick-stat-label">People Protected</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-number">23</div>
+            <div class="quick-stat-label">Agencies Connected</div>
+          </div>
+          <div class="quick-stat">
+            <div class="quick-stat-number">99.2%</div>
+            <div class="quick-stat-label">System Uptime</div>
+          </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="timeline-section">
+          <div class="timeline-header">
+            <h2 class="timeline-title">🕒 Recent Activity</h2>
+            <div class="timeline-filter">
+              <button class="filter-btn active" onclick="filterTimeline('all')">All</button>
+              <button class="filter-btn" onclick="filterTimeline('critical')">Critical</button>
+              <button class="filter-btn" onclick="filterTimeline('reports')">Reports</button>
+              <button class="filter-btn" onclick="filterTimeline('resolved')">Resolved</button>
+            </div>
+          </div>
+
+          <div class="timeline-list" id="timelineList">
+            <div class="timeline-item" data-type="critical">
+              <div class="timeline-indicator critical">⚠️</div>
+              <div class="timeline-content">
+                <div class="timeline-title-text">Tsunami Alert Issued - Chennai Coast</div>
+                <div class="timeline-description">Water recession observed at Marina Beach. Emergency services notified. Evacuation protocols activated.</div>
+                <div class="timeline-meta">
+                  <span>📍 Chennai, Tamil Nadu</span>
+                  <span>⏰ 15 mins ago</span>
+                  <span>👤 Citizen Report</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-item" data-type="reports">
+              <div class="timeline-indicator warning">🌊</div>
+              <div class="timeline-content">
+                <div class="timeline-title-text">High Wave Alert - Mumbai Harbor</div>
+                <div class="timeline-description">Wave height exceeding 4 meters. Port operations suspended. Fishing vessels advised to return.</div>
+                <div class="timeline-meta">
+                  <span>📍 Mumbai, Maharashtra</span>
+                  <span>⏰ 32 mins ago</span>
+                  <span>👨‍✈️ Port Authority</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-item" data-type="resolved">
+              <div class="timeline-indicator success">✅</div>
+              <div class="timeline-content">
+                <div class="timeline-title-text">Coastal Flooding Resolved - Kochi</div>
+                <div class="timeline-description">Water levels returned to normal. Roads reopened. 127 people safely evacuated and returned.</div>
+                <div class="timeline-meta">
+                  <span>📍 Kochi, Kerala</span>
+                  <span>⏰ 1 hour ago</span>
+                  <span>🏛️ NDRF Team</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="timeline-item" data-type="reports">
+              <div class="timeline-indicator info">📊</div>
+              <div class="timeline-content">
+                <div class="timeline-title-text">Social Media Spike Detected</div>
+                <div class="timeline-description">456% increase in ocean-related posts from Visakhapatnam region. AI analysis indicates weather concern.</div>
+                <div class="timeline-meta">
+                  <span>📍 Visakhapatnam, Andhra Pradesh</span>
+                  <span>⏰ 2 hours ago</span>
+                  <span>🤖 NLP System</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enhanced Metrics -->
+        <div class="metrics-grid">
+          <div class="metrics-card">
+            <h3 class="metrics-title">📈 Hazard Trends (Last 30 Days)</h3>
+            <div class="chart-placeholder" id="trendChart">
+              <canvas id="hazardTrendChart" width="400" height="200"></canvas>
+            </div>
+          </div>
+
+          <div class="metrics-card">
+            <h3 class="metrics-title">🎯 Response Effectiveness</h3>
+            <div style="display: grid; gap: 15px; margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                <span style="font-weight: 600;">Average Response Time</span>
+                <span style="color: #10b981; font-weight: 700;">2.3 hours</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                <span style="font-weight: 600;">Alert Accuracy</span>
+                <span style="color: #3b82f6; font-weight: 700;">96.8%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                <span style="font-weight: 600;">Citizen Engagement</span>
+                <span style="color: #f59e0b; font-weight: 700;">84.2%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 10px;">
+                <span style="font-weight: 600;">Lives Protected</span>
+                <span style="color: #dc2626; font-weight: 700;">7.2M+</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -857,7 +1317,7 @@
           <!-- Floating Stats -->
           <div class="floating-stats">
             <div class="floating-card reports">
-              <span class="number" id="reportCount">128</span>
+              <span class="number" id="reportCount">1247</span>
               <span class="label">Reports</span>
             </div>
             <div class="floating-card hazards">
@@ -865,11 +1325,11 @@
               <span class="label">Active</span>
             </div>
             <div class="floating-card social">
-              <span class="number">542</span>
+              <span class="number">12.4K</span>
               <span class="label">Social</span>
             </div>
             <div class="floating-card resolved">
-              <span class="number">67</span>
+              <span class="number">234</span>
               <span class="label">Resolved</span>
             </div>
           </div>
@@ -898,7 +1358,7 @@
             <p>Real-time visualization of ocean hazards across India's coastline</p>
           </div>
           <div class="action-buttons">
-            <button onclick="switchToOverview()">📊 Back to Overview</button>
+            <button onclick="switchToOverview()">📊 Back to Dashboard</button>
             <button onclick="toggleEventsPanel()">📋 Events Panel</button>
             <button onclick="askForLocation()">📍 My Location</button>
           </div>
@@ -913,6 +1373,7 @@
     <div class="sidebar-header">
       <div class="sidebar-title">🚨 Live Events</div>
       <div class="event-count">8 active incidents</div>
+      <button class="sidebar-close-btn" aria-label="Close events panel" onclick="toggleEventsPanel()">✕</button>
     </div>
     <div class="events-list" id="eventsList">
       <div class="event-item tsunami">
@@ -985,6 +1446,23 @@
     </div>
   </div>
 
+  <div id="reportModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('reportModal')">&times;</span>
+      <h3>Submit Hazard Report</h3>
+      <input type="text" id="reportLocation" placeholder="Location" required />
+      <select id="reportType">
+        <option value="">Select Hazard Type</option>
+        <option value="tsunami">Tsunami</option>
+        <option value="storm">Storm Surge</option>
+        <option value="waves">High Waves</option>
+        <option value="flood">Coastal Flooding</option>
+      </select>
+      <textarea id="reportDescription" placeholder="Description" rows="4"></textarea>
+      <button onclick="submitReport()">Submit Report</button>
+    </div>
+  </div>
+
   <div id="adminModal" class="modal">
     <div class="modal-content">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
@@ -995,21 +1473,10 @@
     </div>
   </div>
 
-  <script type="module">
-    // Firebase imports and setup
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-    import { 
-      getFirestore, 
-      doc, 
-      setDoc 
-    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
+  <script>
+    console.log("🌊 OceanSafe Dashboard starting...");
+    
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDRq0DwS1ikDzvl27MTnG4lZfVDJT2lzxI",
       authDomain: "hackathonapp-f8695.firebaseapp.com",
@@ -1020,9 +1487,12 @@
       measurementId: "G-2L479LZ9QV"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    console.log("✅ Firebase initialized");
 
     // Admin credentials
     const ADMIN_EMAIL = "admin@gmail.com";
@@ -1034,8 +1504,6 @@
 
     const headerTitle = document.getElementById("mainHeader");
     const subText = document.getElementById("subText");
-    const submitBtn = document.getElementById("submitBtn");
-    const analyticsBtn = document.getElementById("analyticsBtn");
     const authButtonsContainer = document.getElementById("authButtonsContainer");
 
     function renderAuthButtons(r){
@@ -1057,18 +1525,20 @@
         if(subText) subText.textContent = "Administrative controls and system monitoring";
       } 
       else if(r === "citizen"){
-        if(headerTitle) headerTitle.textContent = "👤 Citizen Reporter";
+        if(headerTitle) headerTitle.textContent = "👤 Citizen Reporter Dashboard";
         if(subText) subText.textContent = "Submit geotagged reports and track hazard status";
         setTimeout(() => askForLocation(), 300);
       } 
       else {
-        if(headerTitle) headerTitle.textContent = "👋 Ocean Hazard Monitoring Platform";
-        if(subText) subText.textContent = "Real-time crowdsourced reporting & social media analytics";
+        if(headerTitle) headerTitle.textContent = "Ocean Hazard Command Center";
+        if(subText) subText.textContent = "Real-time monitoring and response coordination for India's coastal safety";
       }
       renderAuthButtons(r);
     }
 
+    // Apply role-based UI
     applyRoleUI(role);
+    console.log("✅ Role UI applied:", role);
 
     // View switching functions
     window.switchToOverview = function() {
@@ -1076,7 +1546,10 @@
       document.getElementById('mapView').classList.add('hidden');
       document.getElementById('overviewBtn').classList.add('active');
       document.getElementById('mapBtn').classList.remove('active');
-      setTimeout(initializeCharts, 100);
+      setTimeout(() => {
+        initializeCharts();
+        animateNumbers();
+      }, 100);
     }
 
     window.switchToMap = function() {
@@ -1089,6 +1562,132 @@
           window.map.resize();
         }
       }, 100);
+    }
+
+    // Enhanced Dashboard Functions
+    window.showAnalytics = function() {
+      alert('📊 Advanced analytics dashboard - implementing detailed reports and predictive models');
+    }
+
+  /*  window.showEmergencyResponse = function() {
+      alert('🚨 Emergency response protocols activated - coordinating with NDRF and local authorities');
+    }*/
+
+    window.showAlertDetails = function() {
+      alert('⚠️ Critical tsunami alert details:\n\n• Location: Chennai Coast, Marina Beach\n• Magnitude: High risk\n• Evacuation: In progress\n• Emergency contacts: Active');
+    }
+
+    window.submitReport = function() {
+      const location = document.getElementById('reportLocation').value;
+      const type = document.getElementById('reportType').value;
+      const description = document.getElementById('reportDescription').value;
+      
+      if (!location || !type || !description) {
+        alert('Please fill all fields');
+        return;
+      }
+      
+      alert(`✅ Report submitted successfully!\n\nLocation: ${location}\nType: ${type}\nDescription: ${description}`);
+      closeModal('reportModal');
+      
+      // Update counters
+      const totalReports = document.getElementById('totalReports');
+      if (totalReports) {
+        const currentCount = parseInt(totalReports.textContent.replace(/[^\d]/g, ''));
+        totalReports.textContent = (currentCount + 1).toLocaleString();
+      }
+    }
+
+    // Timeline filter functionality
+    window.filterTimeline = function(type) {
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const timelineItems = document.querySelectorAll('.timeline-item');
+      
+      filterBtns.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      timelineItems.forEach(item => {
+        if (type === 'all' || item.dataset.type === type) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Number animation function
+    function animateNumbers() {
+      const numbers = document.querySelectorAll('.overview-stat-number, .quick-stat-number');
+      numbers.forEach(num => {
+        const finalValue = num.textContent;
+        const numericValue = parseFloat(finalValue.replace(/[^\d.]/g, ''));
+        const suffix = finalValue.replace(/[\d.]/g, '');
+        
+        let currentValue = 0;
+        const increment = numericValue / 50;
+        
+        const timer = setInterval(() => {
+          currentValue += increment;
+          if (currentValue >= numericValue) {
+            currentValue = numericValue;
+            clearInterval(timer);
+          }
+          
+          if (numericValue >= 1000) {
+            num.textContent = (Math.floor(currentValue / 1000 * 10) / 10) + 'K' + suffix.replace('K', '');
+          } else {
+            num.textContent = Math.floor(currentValue) + suffix;
+          }
+        }, 30);
+      });
+    }
+
+    // Initialize charts
+    function initializeCharts() {
+      const canvas = document.getElementById('hazardTrendChart');
+      if (canvas && !canvas.chart) {
+        const ctx = canvas.getContext('2d');
+        canvas.chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+              label: 'Tsunami Alerts',
+              data: [2, 5, 3, 8],
+              borderColor: '#dc2626',
+              backgroundColor: 'rgba(220, 38, 38, 0.1)',
+              tension: 0.4
+            }, {
+              label: 'Storm Surge',
+              data: [4, 7, 6, 12],
+              borderColor: '#ea580c',
+              backgroundColor: 'rgba(234, 88, 12, 0.1)',
+              tension: 0.4
+            }, {
+              label: 'Coastal Flooding',
+              data: [6, 8, 9, 15],
+              borderColor: '#0891b2',
+              backgroundColor: 'rgba(8, 145, 178, 0.1)',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+        console.log("✅ Charts initialized");
+      }
     }
 
     // Global functions
@@ -1558,6 +2157,397 @@
     });
 
     console.log('🌊 OceanSafe Dashboard with Mapbox loaded successfully!');
+    // Add this HTML for the report modal (insert before closing body tag)
+const reportModallHTML = `
+<div id="reportModall" class="modal">
+  <div class="modal-content" style="width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+    <span class="close-btn" onclick="closeModal('reportModall')">&times;</span>
+    <h3>🚨 Submit Hazard Report</h3>
+    
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 5px;">Hazard Type *</label>
+      <select id="hazardType" required>
+        <option value="">Select hazard type...</option>
+        <option value="tsunami">🌊 Tsunami</option>
+        <option value="storm">🌀 Storm Surge</option>
+        <option value="waves">🌊 High Waves</option>
+        <option value="flood">💧 Coastal Flooding</option>
+        <option value="erosion">🏔️ Coastal Erosion</option>
+        <option value="other">⚠️ Other</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 5px;">Severity Level *</label>
+      <select id="severityLevel" required>
+        <option value="">Select severity...</option>
+        <option value="low">🟢 Low - Minor concern</option>
+        <option value="medium">🟡 Medium - Moderate risk</option>
+        <option value="high">🟠 High - Significant danger</option>
+        <option value="critical">🔴 Critical - Immediate threat</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 5px;">Location *</label>
+      <input type="text" id="reportLocation" placeholder="Enter location or use GPS" required>
+      <button type="button" onclick="getCurrentLocation()" style="width: auto; padding: 8px 12px; margin-top: 5px; font-size: 12px;">
+        📍 Use Current Location
+      </button>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 5px;">Description *</label>
+      <textarea id="reportDescription" rows="4" placeholder="Describe what you observed in detail..." required></textarea>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-weight: 600; margin-bottom: 5px;">Photo Evidence</label>
+      <input type="file" id="reportPhoto" accept="image/*" onchange="previewPhoto()">
+      <div id="photoPreview" style="margin-top: 10px;"></div>
+    </div>
+
+    <div style="margin-bottom: 15px;">
+      <label style="display: flex; align-items: center; gap: 8px;">
+        <input type="checkbox" id="anonymousReport">
+        <span>Submit anonymously</span>
+      </label>
+    </div>
+
+    <button onclick="submitHazardReport()" style="background: linear-gradient(135deg, #dc2626, #ef4444);">
+      🚨 Submit Report
+    </button>
+  </div>
+</div>`;
+
+// Add modal to page
+document.body.insertAdjacentHTML('beforeend', reportModallHTML);
+
+// Report submission functions
+function getCurrentLocation() {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
+
+  document.getElementById('reportLocation').value = "Getting location...";
+  
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      
+      // Reverse geocoding (simplified)
+      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${mapboxgl.accessToken}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.features && data.features[0]) {
+            document.getElementById('reportLocation').value = data.features[0].place_name;
+          } else {
+            document.getElementById('reportLocation').value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+          }
+        })
+        .catch(() => {
+          document.getElementById('reportLocation').value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        });
+    },
+    function(error) {
+      document.getElementById('reportLocation').value = "";
+      alert("Unable to get location: " + error.message);
+    }
+  );
+}
+
+function previewPhoto() {
+  const file = document.getElementById('reportPhoto').files[0];
+  const preview = document.getElementById('photoPreview');
+  
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">`;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.innerHTML = '';
+  }
+}
+
+async function submitHazardReport() {
+  const hazardType = document.getElementById('hazardType').value;
+  const severity = document.getElementById('severityLevel').value;
+  const location = document.getElementById('reportLocation').value;
+  const description = document.getElementById('reportDescription').value;
+  const anonymous = document.getElementById('anonymousReport').checked;
+  
+  if (!hazardType || !severity || !location || !description) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  const reportData = {
+    hazardType,
+    severity,
+    location,
+    description,
+    anonymous,
+    timestamp: new Date(),
+    status: 'pending',
+    userId: anonymous ? null : (window.currentUser?.uid || 'guest')
+  };
+
+  try {
+    // Show loading state
+    const submitBtn = event.target;
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '⏳ Submitting...';
+    submitBtn.disabled = true;
+
+    // Save to Firebase (if available) or local storage
+    if (window.db) {
+      await window.db.collection('reports').add(reportData);
+    } else {
+      // Fallback to localStorage
+      const reports = JSON.parse(localStorage.getItem('hazardReports') || '[]');
+      reports.push({...reportData, id: Date.now().toString()});
+      localStorage.setItem('hazardReports', JSON.stringify(reports));
+    }
+
+    // Success notification
+    alert('✅ Report submitted successfully! Authorities have been notified.');
+    
+    // Reset form and close modal
+    document.getElementById('hazardType').value = '';
+    document.getElementById('severityLevel').value = '';
+    document.getElementById('reportLocation').value = '';
+    document.getElementById('reportDescription').value = '';
+    document.getElementById('reportPhoto').value = '';
+    document.getElementById('photoPreview').innerHTML = '';
+    document.getElementById('anonymousReport').checked = false;
+    
+    closeModal('reportModall');
+    
+    // Update dashboard stats
+    updateDashboardStats();
+    
+  } catch (error) {
+    console.error('Error submitting report:', error);
+    alert('❌ Error submitting report. Please try again.');
+  } finally {
+    // Reset button
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+function showAnalyticss() {
+  // Create analytics modal
+  const analyticsModalHTML = `
+    <div id="analyticsModal" class="modal">
+      <div class="modal-content" style="width: 95%; max-width: 1000px; height: 90vh; overflow-y: auto;">
+        <span class="close-btn" onclick="closeModal('analyticsModal')">&times;</span>
+        <h3>📊 Advanced Analytics Dashboard</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+          <div style="background: #f8fafc; padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #dc2626;">47</div>
+            <div style="font-size: 0.9rem; color: #64748b;">Reports Today</div>
+          </div>
+          <div style="background: #f8fafc; padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #3b82f6;">2.3h</div>
+            <div style="font-size: 0.9rem; color: #64748b;">Avg Response Time</div>
+          </div>
+          <div style="background: #f8fafc; padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #10b981;">96%</div>
+            <div style="font-size: 0.9rem; color: #64748b;">Verification Rate</div>
+          </div>
+          <div style="background: #f8fafc; padding: 20px; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">7.2M</div>
+            <div style="font-size: 0.9rem; color: #64748b;">People Protected</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px;">
+          <div style="background: #f8fafc; padding: 20px; border-radius: 12px;">
+            <h4 style="margin-bottom: 15px; color: #1e40af;">📈 Hazard Trends (30 Days)</h4>
+            <canvas id="trendChart" width="400" height="200"></canvas>
+          </div>
+          <div style="background: #f8fafc; padding: 20px; border-radius: 12px;">
+            <h4 style="margin-bottom: 15px; color: #1e40af;">🗺️ Geographic Distribution</h4>
+            <div style="text-align: center; color: #64748b; padding: 40px;">
+              <div>Tamil Nadu: 34%</div>
+              <div>Kerala: 28%</div>
+              <div>Maharashtra: 22%</div>
+              <div>Gujarat: 16%</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 12px;">
+          <h4 style="margin-bottom: 15px; color: #1e40af;">📊 Export Options</h4>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="exportData('csv')" style="width: auto; padding: 8px 16px; font-size: 14px;">📄 Export CSV</button>
+            <button onclick="exportData('pdf')" style="width: auto; padding: 8px 16px; font-size: 14px;">📋 Export Report</button>
+            <button onclick="exportData('json')" style="width: auto; padding: 8px 16px; font-size: 14px;">💾 Export JSON</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // Add modal if it doesn't exist
+  if (!document.getElementById('analyticsModal')) {
+    document.body.insertAdjacentHTML('beforeend', analyticsModalHTML);
+  }
+
+  // Show modal
+  openModal('analyticsModal');
+
+  // Initialize trend chart
+  setTimeout(() => {
+    const ctx = document.getElementById('trendChart');
+    if (ctx && !ctx.chart) {
+      ctx.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+          datasets: [
+            {
+              label: 'Tsunami',
+              data: [12, 8, 15, 9],
+              borderColor: '#dc2626',
+              backgroundColor: 'rgba(220, 38, 38, 0.1)',
+            },
+            {
+              label: 'Storm Surge',
+              data: [18, 25, 20, 28],
+              borderColor: '#ea580c',
+              backgroundColor: 'rgba(234, 88, 12, 0.1)',
+            },
+            {
+              label: 'High Waves',
+              data: [45, 52, 48, 61],
+              borderColor: '#d97706',
+              backgroundColor: 'rgba(217, 119, 6, 0.1)',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            }
+          }
+        }
+      });
+    }
+  }, 100);
+}
+
+function exportData(format) {
+  // Sample data export functionality
+  const data = {
+    timestamp: new Date().toISOString(),
+    totalReports: 1247,
+    criticalAlerts: 8,
+    resolvedIssues: 234,
+    socialMentions: 12400
+  };
+
+  switch(format) {
+    case 'csv':
+      const csv = Object.entries(data).map(([key, value]) => `${key},${value}`).join('\n');
+      downloadFile(csv, 'hazard-data.csv', 'text/csv');
+      break;
+    case 'json':
+      downloadFile(JSON.stringify(data, null, 2), 'hazard-data.json', 'application/json');
+      break;
+    case 'pdf':
+      alert('📋 PDF report will be generated and emailed to your registered address.');
+      break;
+  }
+}
+
+function downloadFile(content, filename, contentType) {
+  const blob = new Blob([content], { type: contentType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function showEmergencyResponse() {
+  const emergencyModalHTML = `
+    <div id="emergencyModal" class="modal">
+      <div class="modal-content" style="width: 90%; max-width: 600px;">
+        <span class="close-btn" onclick="closeModal('emergencyModal')">&times;</span>
+        <h3>🚨 Emergency Response Center</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+          <button onclick="contactEmergency('ndrf')" style="background: #dc2626; padding: 15px; font-size: 14px;">
+            🚑 Contact NDRF<br><small>National Disaster Response Force</small>
+          </button>
+          <button onclick="contactEmergency('coastguard')" style="background: #0891b2; padding: 15px; font-size: 14px;">
+            🚢 Coast Guard<br><small>Indian Coast Guard</small>
+          </button>
+          <button onclick="contactEmergency('incois')" style="background: #3b82f6; padding: 15px; font-size: 14px;">
+            🌊 INCOIS<br><small>Ocean Information Services</small>
+          </button>
+          <button onclick="contactEmergency('local')" style="background: #f59e0b; padding: 15px; font-size: 14px;">
+            👮 Local Authority<br><small>District Collector</small>
+          </button>
+        </div>
+
+        <div style="background: #fef2f2; padding: 15px; border-radius: 10px; border-left: 4px solid #dc2626; margin-bottom: 20px;">
+          <h4 style="color: #dc2626; margin-bottom: 10px;">⚠️ Active Alerts</h4>
+          <div style="font-size: 14px;">
+            • Tsunami warning - Chennai Coast (15 min ago)<br>
+            • High wave alert - Mumbai Harbor (32 min ago)<br>
+            • Storm surge watch - Kochi (1 hour ago)
+          </div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 10px; border-left: 4px solid #10b981;">
+          <h4 style="color: #10b981; margin-bottom: 10px;">✅ Response Status</h4>
+          <div style="font-size: 14px;">
+            • NDRF teams deployed: 3 locations<br>
+            • Coast Guard vessels: 12 active<br>
+            • Evacuation centers: 45 ready<br>
+            • Emergency contacts: All operational
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  if (!document.getElementById('emergencyModal')) {
+    document.body.insertAdjacentHTML('beforeend', emergencyModalHTML);
+  }
+  
+  openModal('emergencyModal');
+}
+
+function contactEmergency(type) {
+  const contacts = {
+    ndrf: { name: 'NDRF', phone: '011-26105579', email: 'control@ndrf.gov.in' },
+    coastguard: { name: 'Coast Guard', phone: '1554', email: 'ops@indiancoastguard.gov.in' },
+    incois: { name: 'INCOIS', phone: '040-23886001', email: 'director@incois.gov.in' },
+    local: { name: 'Local Authority', phone: '108', email: 'emergency@district.gov.in' }
+  };
+
+  const contact = contacts[type];
+  const message = `Contact ${contact.name}:\n\nPhone: ${contact.phone}\nEmail: ${contact.email}\n\nWould you like to:`;
+  
+  if (confirm(`${message}\n\n• Call Now (Yes)\n• Send Email (No)\n• Cancel`)) {
+    window.open(`tel:${contact.phone}`);
+  } else {
+    window.open(`mailto:${contact.email}?subject=Emergency Response Required&body=Urgent assistance needed for ocean hazard event.`);
+  }
+}
+
+
 
   </script>
 </body>
